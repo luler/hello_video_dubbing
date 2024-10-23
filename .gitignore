@@ -1,0 +1,9 @@
+/.idea
+/.vscode
+*.log
+.DS_Store
+**/__pycache__
+/exp
+/temp_audio
+/result
+*.mp4

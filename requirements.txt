@@ -1,0 +1,8 @@
+torch
+torchaudio
+git+https://github.com/m-bain/whisperx.git
+pysrt
+googletrans==4.0.0-rc1
+edge_tts
+pydub
+snowflake-id
