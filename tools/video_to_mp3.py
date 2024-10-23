@@ -8,6 +8,9 @@ def extract_audio(input_video, output_audio):
         ffmpeg_command = [
             'ffmpeg',
             '-i', input_video,
+            '-y',
+            '-vn',
+            '-q:a', '5',  # 适中的音频质量
             '-acodec', 'libmp3lame',
             output_audio
         ]

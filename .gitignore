@@ -7,3 +7,6 @@
 /temp_audio
 /result
 *.mp4
+*.mp3
+*.srt
+*.ass
