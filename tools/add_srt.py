@@ -48,13 +48,12 @@ def process_srt_with_pysrt(input_file, output_file, max_length=30):
     subs.save(output_file, encoding='utf-8')
 
 
-def add_srt(video_path, translated_srt, output_path):
-    print('添加字幕进行中...')
+def transform_ass(translated_srt, target_ass):
+    print('字幕格式转换进行中...')
     # 字幕太长换行处理
-    target_srt = os.path.splitext(video_path)[0] + '.srt'
+    target_srt = os.path.splitext(target_ass)[0] + '.srt'
     process_srt_with_pysrt(translated_srt, target_srt)
     # 转换srt为ass格式，设定固定样式
-    target_ass = target_srt.replace('.srt', '.ass')
     ffmpeg_command = [
         'ffmpeg',
         '-y',
@@ -73,6 +72,11 @@ def add_srt(video_path, translated_srt, output_path):
 
     with open(target_ass, 'w', encoding='utf-8') as f:
         f.write(new_content)
+    print('字幕格式转换成功')
+
+
+def add_srt(video_path, target_ass, output_path):
+    print('添加字幕进行中...')
     # ffmpeg命令
     ffmpeg_command = [
         'ffmpeg',
