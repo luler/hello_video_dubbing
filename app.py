@@ -53,9 +53,9 @@ srt_video = prefix + '/target_srt.mp4'
 add_srt(output_video_file, translated_filename, srt_video)
 time6 = time.time() - start_time
 
-print('步骤1-提取音频耗时：' + time1)
-print('步骤2-提取字幕耗时：' + time2)
-print('步骤3-翻译字幕耗时：' + time3)
-print('步骤4-字幕配音耗时：' + time4)
-print('步骤5-视频音频替换耗时：' + time5)
-print('步骤6-添加字幕耗时：' + time6)
+print(f'步骤1-提取音频耗时：{time1}')
+print(f'步骤2-提取字幕耗时：{time2}')
+print(f'步骤3-翻译字幕耗时：{time3}')
+print(f'步骤4-字幕配音耗时：{time4}')
+print(f'步骤5-视频音频替换耗时：{time5}')
+print(f'步骤6-添加字幕耗时：{time6}')

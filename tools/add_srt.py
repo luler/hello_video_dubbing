@@ -1,4 +1,5 @@
 # 使用 ffmpeg-python 替换视频中的音频
+import os
 import re
 import subprocess
 
@@ -50,19 +51,19 @@ def process_srt_with_pysrt(input_file, output_file, max_length=30):
 def add_srt(video_path, translated_srt, output_path):
     print('添加字幕进行中...')
     # 字幕太长换行处理
-    translated_srt_auto = translated_srt.replace('.srt', '_auto.srt')
-    process_srt_with_pysrt(translated_srt, translated_srt_auto)
+    target_srt = os.path.splitext(video_path)[0] + '.srt'
+    process_srt_with_pysrt(translated_srt, target_srt)
     # 转换srt为ass格式，设定固定样式
-    translated_ass_auto = translated_srt_auto.replace('.srt', '.ass')
+    target_ass = target_srt.replace('.srt', '.ass')
     ffmpeg_command = [
         'ffmpeg',
         '-y',
-        '-i', translated_srt_auto,
-        translated_ass_auto
+        '-i', target_srt,
+        target_ass
     ]
     subprocess.run(ffmpeg_command, check=True)
     # 替换ass样式
-    with open(translated_ass_auto, 'r', encoding='utf-8') as f:
+    with open(target_ass, 'r', encoding='utf-8') as f:
         content = f.read()
 
         # 使用正则表达式查找并替换Style行
@@ -70,15 +71,15 @@ def add_srt(video_path, translated_srt, output_path):
     new_style = 'Style: Default,Arial,12,&Hffffff,&Hffffff,&H80000000,&H00000000,0,0,0,0,100,100,0,0,3,2,0,2,10,10,10,1'
     new_content = re.sub(pattern, new_style, content, flags=re.MULTILINE)
 
-    with open(translated_ass_auto, 'w', encoding='utf-8') as f:
+    with open(target_ass, 'w', encoding='utf-8') as f:
         f.write(new_content)
     # ffmpeg命令
     ffmpeg_command = [
         'ffmpeg',
         '-y',
         '-i', video_path,
-        # '-vf', f"subtitles={translated_srt_auto}:force_style='FontSize=12'",
-        '-vf', f"ass={translated_ass_auto}",
+        # '-vf', f"subtitles={target_srt}:force_style='FontSize=12'",
+        '-vf', f"ass={target_ass}",
         '-c:a', 'copy',
         output_path
     ]
