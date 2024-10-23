@@ -1,6 +1,7 @@
 import os
 import time
 
+from dotenv import load_dotenv
 from snowflake import SnowflakeGenerator
 
 from tools.add_srt import add_srt
@@ -10,8 +11,11 @@ from tools.translate_srt import translate_srt
 from tools.video_to_mp3 import extract_audio
 from tools.whisperx_srt import convert_audio_to_srt
 
+# 加载 .env 文件
+load_dotenv()
+
 # 输入视频，一般只需要修改这个
-input_video = 'test.mp4'
+input_video = os.getenv('INPUT_VIDEO')
 
 gen = SnowflakeGenerator(1)
 prefix = 'result/' + str(next(gen))
