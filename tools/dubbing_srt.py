@@ -94,12 +94,15 @@ def dubbing_srt(srt_file, output_mp3, rate="+0%"):
         else:
             # 调整音频片段播放速度
             audio_segment = adjust_audio_speed(audio_segment, subtitle_duration_ms)
+            current_duration_ms = len(audio_segment)
+            # 多还少补
+            gap_duration1 = current_duration_ms - subtitle_duration_ms
 
         # 计算空白间隔的时长
         gap_duration2 = max(0, start_time_ms - last_end_time)  # 时间差，单位毫秒
 
         # 添加空白的间隔
-        combined += AudioSegment.silent(duration=gap_duration1 + gap_duration2)
+        combined += AudioSegment.silent(duration=max(0, gap_duration1 + gap_duration2))
 
         # 添加字幕音频
         combined += audio_segment
