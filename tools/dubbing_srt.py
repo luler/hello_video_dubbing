@@ -3,7 +3,13 @@ import os
 
 import edge_tts
 import pysrt
+from dotenv import load_dotenv
 from pydub import AudioSegment
+
+# 加载 .env 文件
+load_dotenv()
+
+edge_tts_voice = os.getenv('EDGE_TTS_VOICE', 'zh-CN-YunxiNeural')
 
 
 # 读取并解析 SRT 文件
@@ -22,6 +28,8 @@ def srt_to_text_and_time(file_path):
 
 # 将字幕段落转换为语音并保存到单独的文件，使用 edge_tts (同步调用)
 def text_to_speech_edge_sync(text, index, voice="zh-CN-YunxiNeural", rate="+0%", output_dir="temp_audio"):
+    # 确保临时文件夹存在
+    os.makedirs(output_dir, exist_ok=True)
     temp_audio_file = f"{output_dir}/temp_{index}.mp3"
 
     # 使用 asyncio.run() 来调用异步保存操作
@@ -50,8 +58,7 @@ def adjust_audio_speed(audio_segment, target_duration_ms):
 
 
 # 合并语音文件并根据时间戳插入空白
-def dubbing_srt(srt_file, output_mp3, voice="zh-CN-YunxiNeural", rate="+0%",
-                output_dir="temp_audio"):
+def dubbing_srt(srt_file, output_mp3, rate="+0%"):
     print(f"字幕配音进行中...")
     # 读取并解析 SRT 文件
     subtitles = srt_to_text_and_time(srt_file)
@@ -59,12 +66,9 @@ def dubbing_srt(srt_file, output_mp3, voice="zh-CN-YunxiNeural", rate="+0%",
     combined = AudioSegment.silent(duration=0)
     last_end_time = 0  # 记录上一个字幕结束时间，单位毫秒
 
-    # 确保临时文件夹存在
-    os.makedirs(output_dir, exist_ok=True)
-
     for index, (text, start_time, end_time) in enumerate(subtitles):
         # 将字幕文本转为语音文件 (同步调用)
-        temp_audio_file = text_to_speech_edge_sync(text, index, voice, rate, output_dir)
+        temp_audio_file = text_to_speech_edge_sync(text, index, edge_tts_voice, rate)
         audio_segment = AudioSegment.from_mp3(temp_audio_file)
 
         # 计算当前段落开始时间与上一个段落结束时间的差值
