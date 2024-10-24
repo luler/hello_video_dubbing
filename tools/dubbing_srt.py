@@ -52,7 +52,13 @@ def adjust_audio_speed(audio_segment, target_duration_ms):
 
     if current_duration_ms > target_duration_ms:
         speed_factor = current_duration_ms / target_duration_ms
-        audio_segment = audio_segment.speedup(playback_speed=speed_factor, crossfade=30, chunk_size=50)
+        # print(speed_factor)
+        if 1.2 <= speed_factor < 1.5:
+            audio_segment = audio_segment.speedup(playback_speed=speed_factor, crossfade=30, chunk_size=50)
+        elif speed_factor >= 1.5:
+            audio_segment = audio_segment.speedup(playback_speed=speed_factor, crossfade=30, chunk_size=20)
+        else:
+            audio_segment = audio_segment.speedup(playback_speed=speed_factor)
 
     return audio_segment
 
@@ -80,14 +86,20 @@ def dubbing_srt(srt_file, output_mp3, rate="+0%"):
         # 计算该字幕应该持续的时长
         subtitle_duration_ms = end_time_ms - start_time_ms
 
-        # 调整音频片段播放速度
-        audio_segment = adjust_audio_speed(audio_segment, subtitle_duration_ms)
+        # 判断配音市场和字幕时长之间的差别进行不同处理
+        current_duration_ms = len(audio_segment)
+        gap_duration1 = 0
+        if current_duration_ms <= subtitle_duration_ms:
+            gap_duration1 = subtitle_duration_ms - current_duration_ms
+        else:
+            # 调整音频片段播放速度
+            audio_segment = adjust_audio_speed(audio_segment, subtitle_duration_ms)
 
         # 计算空白间隔的时长
-        gap_duration = max(0, start_time_ms - last_end_time)  # 时间差，单位毫秒
+        gap_duration2 = max(0, start_time_ms - last_end_time)  # 时间差，单位毫秒
 
         # 添加空白的间隔
-        combined += AudioSegment.silent(duration=gap_duration)
+        combined += AudioSegment.silent(duration=gap_duration1 + gap_duration2)
 
         # 添加字幕音频
         combined += audio_segment
