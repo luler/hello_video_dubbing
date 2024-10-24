@@ -105,7 +105,7 @@ def dubbing_srt(srt_file, output_mp3, rate="+0%"):
         combined += audio_segment
 
         # 更新最后一个字幕的结束时间
-        last_end_time = start_time_ms + len(audio_segment)
+        last_end_time = end_time_ms
 
         # 删除临时音频文件
         os.remove(temp_audio_file)
