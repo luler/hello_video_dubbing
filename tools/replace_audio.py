@@ -7,6 +7,7 @@ def replace_audio_ffmpeg_python(video_path, audio_path, output_path):
     # ffmpeg命令
     ffmpeg_command = [
         'ffmpeg',
+        '-y',
         '-i', video_path,
         '-i', audio_path,
         '-map', '0:v:0',
