@@ -71,6 +71,7 @@ def dubbing_srt(srt_file, output_mp3, rate="+0%"):
     # 初始化空白音频
     combined = AudioSegment.silent(duration=0)
     last_end_time = 0  # 记录上一个字幕结束时间，单位毫秒
+    gap_duration1 = 0
 
     for index, (text, start_time, end_time) in enumerate(subtitles):
         # 将字幕文本转为语音文件 (同步调用)
@@ -83,12 +84,17 @@ def dubbing_srt(srt_file, output_mp3, rate="+0%"):
         end_time_ms = (
                               end_time.hour * 3600 + end_time.minute * 60 + end_time.second) * 1000 + end_time.microsecond / 1000
 
+        # 计算空白间隔的时长
+        gap_duration2 = max(0, start_time_ms - last_end_time)  # 时间差，单位毫秒
+
+        # 添加空白的间隔
+        combined += AudioSegment.silent(duration=max(0, gap_duration1 + gap_duration2))
+
         # 计算该字幕应该持续的时长
         subtitle_duration_ms = end_time_ms - start_time_ms
 
         # 判断配音市场和字幕时长之间的差别进行不同处理
         current_duration_ms = len(audio_segment)
-        gap_duration1 = 0
         if current_duration_ms <= subtitle_duration_ms:
             gap_duration1 = subtitle_duration_ms - current_duration_ms
         else:
@@ -97,12 +103,6 @@ def dubbing_srt(srt_file, output_mp3, rate="+0%"):
             current_duration_ms = len(audio_segment)
             # 多还少补
             gap_duration1 = current_duration_ms - subtitle_duration_ms
-
-        # 计算空白间隔的时长
-        gap_duration2 = max(0, start_time_ms - last_end_time)  # 时间差，单位毫秒
-
-        # 添加空白的间隔
-        combined += AudioSegment.silent(duration=max(0, gap_duration1 + gap_duration2))
 
         # 添加字幕音频
         combined += audio_segment
