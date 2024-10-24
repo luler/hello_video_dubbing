@@ -44,7 +44,7 @@ def adjust_audio_speed(audio_segment, target_duration_ms):
 
     if current_duration_ms > target_duration_ms:
         speed_factor = current_duration_ms / target_duration_ms
-        audio_segment = audio_segment.speedup(playback_speed=speed_factor)
+        audio_segment = audio_segment.speedup(playback_speed=speed_factor, crossfade=30, chunk_size=50)
 
     return audio_segment
 
