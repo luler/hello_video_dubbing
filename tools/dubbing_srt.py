@@ -102,7 +102,7 @@ def dubbing_srt(srt_file, output_mp3, rate="+0%"):
             audio_segment = adjust_audio_speed(audio_segment, subtitle_duration_ms)
             current_duration_ms = len(audio_segment)
             # 多还少补
-            gap_duration1 = current_duration_ms - subtitle_duration_ms
+            gap_duration1 = subtitle_duration_ms - current_duration_ms
 
         # 添加字幕音频
         combined += audio_segment
