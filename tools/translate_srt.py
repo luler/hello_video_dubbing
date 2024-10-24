@@ -1,4 +1,5 @@
 # 准备 Google Translate API
+import math
 import os
 
 import pysrt
@@ -55,16 +56,19 @@ def translate_srt(srt_filename, translated_filename):
         batch_size *= 4  # 每4行为一个字幕
         batch_srt = ''
         batch_srt_data = []
+        times = math.ceil(len(lines) / batch_size)
         for i, line in enumerate(lines, start=1):
             batch_srt += line
             if i % batch_size == 0:
                 batch_srt = ai_translate_text(batch_srt).strip()
                 batch_srt_data.append(batch_srt)
                 batch_srt = ''
+                print(f'大语言模型翻译进度：{len(batch_srt_data)}/{times}')
 
         if batch_srt:
             batch_srt = ai_translate_text(batch_srt).strip()
             batch_srt_data.append(batch_srt)
+            print(f'大语言模型翻译进度：{len(batch_srt_data)}/{times}')
         # 翻译结果写入目标文件
         with open(translated_filename, 'w', encoding='utf-8') as f:
             f.write("\n\n".join(batch_srt_data))
@@ -73,10 +77,14 @@ def translate_srt(srt_filename, translated_filename):
         subs = pysrt.open(srt_filename, encoding='utf-8')
 
         # 翻译每个字幕段落的文本
+        times = len(subs)
+        i = 1
         for sub in subs:
             original_text = sub.text
             translated_text = translator.translate(original_text, dest='zh-CN').text
             sub.text = translated_text
+            print(f'谷歌翻译进度：{i}/{times}')
+            i += 1
 
         # 生成翻译后的 SRT 文件
         subs.save(translated_filename, encoding='utf-8')
