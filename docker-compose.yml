@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  hello_video_dubbing:
+    image: ghcr.io/luler/hello_video_dubbing:latest
+    #    build:
+    #      context: .
+    #      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 17860:7860
+    volumes:
+      - .:/app

@@ -1,0 +1,14 @@
+/.idea
+/.vscode
+*.log
+.DS_Store
+**/__pycache__
+/exp
+/temp_audio
+/result
+*.mp4
+*.mp3
+*.srt
+*.ass
+.env
+/.gradio
