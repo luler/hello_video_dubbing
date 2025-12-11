@@ -3,7 +3,7 @@ torchaudio==2.5.1
 whisperx==3.4.2
 pysrt==1.1.2
 googletrans-py==4.0.0
-edge-tts==7.2.3
+edge-tts==7.2.6
 pydub==0.25.1
 python-dotenv==1.0.1
 websockets==15.0.1
