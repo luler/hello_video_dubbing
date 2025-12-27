@@ -2,6 +2,7 @@ import asyncio
 import math
 import os
 
+import aiohttp
 import edge_tts
 import pysrt
 from dotenv import load_dotenv
@@ -18,6 +19,10 @@ if os.getenv('https_proxy'):
     proxy = os.getenv('https_proxy')
 if os.getenv('http_proxy'):
     proxy = os.getenv('http_proxy')
+
+tts_type = os.getenv('TTS_TYPE', 'edge_tts')
+tts_service_url = os.getenv('TTS_SERVICE_URL', 'http://localhost:8080/v1/audio/speech')
+tts_api_key = os.getenv('TTS_SERVICE_API_KEY', '')
 
 edge_tts_connect_timeout = int(os.getenv('EDGE_TTS_CONNECT_TIMEOUT', 20))
 edge_tts_max_concurrency = int(os.getenv('EDGE_TTS_MAX_CONCURRENCY', 3))
@@ -44,11 +49,43 @@ async def text_to_speech_edge(text, index, text_length, semaphore, voice="zh-CN-
         output_dir = '.'
     async with semaphore:  # Limit concurrency here
         temp_audio_file = f"{output_dir}/temp_{index}.mp3"
-        communicator = edge_tts.Communicate(text, voice=voice, rate=rate, proxy=proxy,
-                                            connect_timeout=edge_tts_connect_timeout)
-        await communicator.save(temp_audio_file)
-        print(f'字幕配音进度：{index}/{text_length}')
-        return temp_audio_file
+        max_retries = 3
+        retry_delay = 3  # 秒
+
+        for attempt in range(max_retries):
+            try:
+                if tts_type == 'tts_service':
+                    headers = {
+                        'Content-Type': 'application/json',
+                        'Authorization': f'Bearer {tts_api_key}'
+                    }
+                    data = {
+                        'model': 'tts-1',
+                        'input': text,
+                        'voice': voice,
+                        'speed': 1.0
+                    }
+                    async with aiohttp.ClientSession() as session:
+                        async with session.post(tts_service_url, headers=headers, json=data) as response:
+                            if response.status == 200:
+                                with open(temp_audio_file, 'wb') as f:
+                                    f.write(await response.read())
+                            else:
+                                error_text = await response.text()
+                                raise Exception(f"TTS service error: {response.status}, {error_text}")
+                else:
+                    communicator = edge_tts.Communicate(text, voice=voice, rate=rate, proxy=proxy,
+                                                        connect_timeout=edge_tts_connect_timeout)
+                    await communicator.save(temp_audio_file)
+                print(f'字幕配音进度：{index + 1}/{text_length}')
+                return temp_audio_file
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    print(f'字幕配音失败 ({index + 1}/{text_length})，{retry_delay}秒后重试... 错误: {str(e)}')
+                    await asyncio.sleep(retry_delay)
+                else:
+                    print(f'字幕配音失败 ({index + 1}/{text_length})，已达到最大重试次数。错误: {str(e)}')
+                    raise
 
 
 # 计算时间差，返回毫秒
